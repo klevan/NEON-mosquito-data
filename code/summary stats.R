@@ -50,7 +50,8 @@ pathogenStatus <- summarize(group_by(path[path$testNumber==1, ], testingID),
                                                        [id$testingID == testingID]),
                             numMosquitoesTested = sum(poolSize),
                             relativeAbundance = round(numMosquitoesPresent/
-                              sampling$estimatedAbundance[sampling$eventID == eventID], 3))
+                              sampling$estimatedAbundance[sampling$eventID == eventID], 
+                              3))
 
 pathogenStatus <- left_join(pathogenStatus, 
                             summarize(group_by(path[path$finalResult=="Y" &
@@ -62,6 +63,13 @@ pathogenStatus <- left_join(pathogenStatus,
                             by = "testingID")
 
 class(pathogenStatus) <- "data.frame"
+
+pathogenStatus$maxPropPositive <- ((pathogenStatus$maxPositiveMosquitoes/
+                                     pathogenStatus$numMosquitoesTested)*
+                                     pathogenStatus$relativeAbundance)
+pathogenStatus$minPropPositive <- ((pathogenStatus$minPositiveMosquitoes/
+                                     pathogenStatus$numMosquitoesTested)*
+                                     pathogenStatus$relativeAbundance)
 
 # Relationship between Abundance & Richness
 par(mfrow = c(1, 1))
@@ -98,3 +106,10 @@ for (i in unique(sampling$siteID)[c(3, 1, 2, 4)]){
   }
 }
 
+# Pathogen status within the mosquito community
+par(mfrow = c(1, 1))
+plot(x = sampling$estimatedAbundance,
+     y = sampling$richness,
+     xlab = "Estimated mosquito abundance",
+     ylab = "Richness", pch = 21, bg = "forestgreen",
+     cex = 1.5)
